@@ -5,12 +5,13 @@ from .models import Post
 
 
 class PostListView(ListView):
+    context_object_name = 'posts'
+    paginate_by = 3
     queryset = Post.published.all()
     template_name = 'blog/post/list.html'
-    context_object_name = 'posts'
 
 
 class PostDetailView(DetailView):
-    model = Post
-    template_name = 'blog/post/detail.html'
     context_object_name = 'post'
+    queryset = Post.published.all()
+    template_name = 'blog/post/detail.html'
