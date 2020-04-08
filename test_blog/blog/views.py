@@ -1,22 +1,16 @@
-from django.shortcuts import get_object_or_404, render
+from django.views.generic import ListView
+from django.views.generic.detail import DetailView
 
 from .models import Post
 
 
-def post_list(request):
-    posts = Post.published.all()
+class PostListView(ListView):
+    queryset = Post.published.all()
+    template_name = 'blog/post/list.html'
+    context_object_name = 'posts'
 
-    context = {'posts': posts}
-    return render(request, 'blog/post/list.html', context)
 
-
-def post_detail(request, year, month, day, slug):
-    post = get_object_or_404(Post,
-                             slug=slug,
-                             status='published',
-                             publish__year=year,
-                             publish__month=month,
-                             publish__day=day)
-
-    context = {'post': post}
-    return render(request, 'blog/post/detail.html', context)
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/post/detail.html'
+    context_object_name = 'post'
