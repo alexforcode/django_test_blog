@@ -1,9 +1,8 @@
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView
-from django.views.generic.detail import DetailView
 
-from .forms import SharePostForm
+from .forms import CommentForm, SharePostForm
 from .models import Post
 
 
@@ -14,10 +13,32 @@ class PostListView(ListView):
     template_name = 'blog/post/list.html'
 
 
-class PostDetailView(DetailView):
-    context_object_name = 'post'
-    queryset = Post.published.all()
-    template_name = 'blog/post/detail.html'
+def post_detail(request, year, month, day, post):
+    post = get_object_or_404(Post,
+                             status='published',
+                             slug=post,
+                             publish__year=year,
+                             publish__month=month,
+                             publish__day=day)
+    comments = post.comments.filter(active=True)
+    new_comment = None
+
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post
+            new_comment.save()
+    else:
+        comment_form = CommentForm()
+
+    context = {
+        'post': post,
+        'comments': comments,
+        'new_comment': new_comment,
+        'comment_form': comment_form
+    }
+    return render(request, 'blog/post/detail.html', context)
 
 
 def post_share(request, post_id):
@@ -37,5 +58,9 @@ def post_share(request, post_id):
     else:
         form = SharePostForm()
 
-    context = {'post': post, 'form': form, 'sent': sent}
+    context = {
+        'post': post,
+        'form': form,
+        'sent': sent
+    }
     return render(request, 'blog/post/share.html', context)
