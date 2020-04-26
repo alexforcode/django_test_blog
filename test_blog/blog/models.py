@@ -41,6 +41,7 @@ class Post(models.Model):
         return self.title
 
     class Meta:
+        ordering = ['publish']
         verbose_name = 'Post'
         verbose_name_plural = 'Posts'
 
@@ -58,5 +59,6 @@ class Comment(models.Model):
         return f'Comment by {self.name} on {self.post}'
 
     class Meta:
+        ordering = ['-created']
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
